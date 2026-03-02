@@ -2,58 +2,44 @@ pipeline {
     agent any
 
     tools {
-        maven 'maven-3.9'   // name of Maven installation in Jenkins
+        maven 'maven-3.9'
     }
 
     environment {
-        IMAGE = "hamza5839/jenkins-pipeline"
-        TAG = "2.1"
+        IMAGE = "devhamzaops/java-maven-app"
+        TAG = "1.1"
     }
 
     stages {
-
-        stage('Build JAR') {
+        stage('Build Jar') {
             steps {
-                echo "Building the application..."
-                sh 'mvn package'  // packages your Java app into a jar/war
+                echo "Building the application jar"
+                sh 'mvn clean package'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                echo "Building Docker image..."
+                echo "Building Docker image"
                 sh "docker build -t $IMAGE:$TAG ."
             }
         }
 
         stage('Push Docker Image') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: '79e1e90f-4fd1-4c20-9216-309856f9d920',
-                    usernameVariable: 'USER',
-                    passwordVariable: 'PASS'
-                )]) {
-                    echo "Logging in and pushing to DockerHub..."
-                    sh 'echo "$PASS" | docker login -u "$USER" --password-stdin'
-                    sh "docker push $IMAGE:$TAG"
+                withCredentials([usernamePassword(credentialsId: '79e1e90f-4fd1-4c20-9216-309856f9d920', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                    sh '''
+                    echo "$PASS" | docker login -u "$USER" --password-stdin
+                    docker push $IMAGE:$TAG
+                    '''
                 }
             }
         }
 
         stage('Deploy') {
             steps {
-                echo "Running deployment commands..."
-                sh 'echo "Deploy step here"'  // replace with real deploy commands
+                echo "Deploy step placeholder"
             }
-        }
-    }
-
-    post {
-        success {
-            echo 'Pipeline succeeded!'
-        }
-        failure {
-            echo 'Pipeline failed!'
         }
     }
 }
