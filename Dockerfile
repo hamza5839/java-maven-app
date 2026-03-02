@@ -1,20 +1,14 @@
-# Use a lightweight Node.js image
-FROM node:20-alpine
+# Use a Java runtime
+FROM openjdk:11-jre-slim
 
-# Set working directory in container
+# Set working directory inside container
 WORKDIR /app
 
-# Copy package.json and package-lock.json first (for caching)
-COPY package*.json ./
+# Copy the built jar from Maven target folder
+COPY target/java-maven-app-1.1.0-SNAPSHOT.jar app.jar
 
-# Install dependencies
-RUN npm install
+# Expose the port your Spring Boot app runs on
+EXPOSE 8080
 
-# Copy the rest of your app files
-COPY . .
-
-# Expose the port your app runs on
-EXPOSE 3000
-
-# Default command to start your app
-CMD ["node", "server.js"]
+# Run the jar
+ENTRYPOINT ["java","-jar","app.jar"]
